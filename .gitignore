@@ -1,3 +1,4 @@
-node_modules/  
+ÿþnode_modules/  
 dist/  
 .env 
+/src/generated/prisma

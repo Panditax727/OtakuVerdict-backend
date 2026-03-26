@@ -7,7 +7,7 @@ export class AppError extends Error {
         super(message)
         this.statusCode = statusCode
     }
-}
+};
 
 export const errorHandler = (
     err: Error,
@@ -23,4 +23,4 @@ export const errorHandler = (
     }
 
     res.status(500).json({ success: false, message: 'Error interno del servidor.' })
-}
+};

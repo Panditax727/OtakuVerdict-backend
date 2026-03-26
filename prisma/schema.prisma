@@ -1,0 +1,230 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  username  String   @unique
+  password  String
+  avatar    String?
+  bio       String?
+  role      String   @default("user")
+  points    Int      @default(0)
+  level     String   @default("Novato")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  ratings             Rating[]
+  posts               Post[]
+  favorites           Favorite[]
+  followers           Follow[]      @relation("following")
+  following           Follow[]      @relation("follower")
+  comments            Comment[]
+  reputationGiven     Reputation[]  @relation("reputationGiven")
+  reputationReceived  Reputation[]  @relation("reputationReceived")
+  achievements        Achievement[]
+
+  messagesSent     Message[] @relation("messagesSent")
+  messagesReceived Message[] @relation("messagesReceived")
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  content    String
+  fromUserId String
+  toUserId   String
+  read       Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  fromUser User @relation("messagesSent", fields: [fromUserId], references: [id])
+  toUser   User @relation("messagesReceived", fields: [toUserId], references: [id])
+}
+
+model Follow {
+  id          String @id @default(uuid())
+  followerId  String
+  followingId String
+
+  follower  User @relation("follower",  fields: [followerId],  references: [id])
+  following User @relation("following", fields: [followingId], references: [id])
+
+  @@unique([followerId, followingId])
+}
+
+model Anime {
+  id               String   @id @default(uuid())
+  title            String
+  titleJp          String?
+  synopsis         String?
+  coverImage       String?
+  episodes         Int?
+  status           String?
+  year             Int?
+  studio           String?
+  director         String?
+  genre            String[]
+  trailerUrl       String?
+  streamingUrls    String[]
+  trivia           String[]
+  behindTheScenes  String[]
+  createdAt        DateTime @default(now())
+
+  comparativas Comparativa[]
+  ratings      Rating[]
+  favorites    Favorite[]
+  characters   Character[]
+  wikiSections WikiSection[]
+}
+
+model Manga {
+  id               String   @id @default(uuid())
+  title            String
+  titleJp          String?
+  synopsis         String?
+  coverImage       String?
+  chapters         Int?
+  volumes          Int?
+  status           String?
+  year             Int?
+  author           String?
+  publisher        String?
+  genre            String[]
+  readingUrls      String[]
+  trivia           String[]
+  behindTheScenes  String[]
+  createdAt        DateTime @default(now())
+
+  comparativas Comparativa[]
+  ratings      Rating[]
+  favorites    Favorite[]
+  characters   Character[]
+  wikiSections WikiSection[]
+}
+
+model WikiSection {
+  id        String   @id @default(uuid())
+  title     String
+  content   String
+  order     Int      @default(0)
+  animeId   String?
+  mangaId   String?
+  createdAt DateTime @default(now())
+
+  anime Anime? @relation(fields: [animeId], references: [id])
+  manga Manga? @relation(fields: [mangaId], references: [id])
+}
+
+model Character {
+  id          String  @id @default(uuid())
+  name        String
+  image       String?
+  role        String?
+  description String?
+  animeId     String?
+  mangaId     String?
+
+  anime Anime? @relation(fields: [animeId], references: [id])
+  manga Manga? @relation(fields: [mangaId], references: [id])
+}
+
+model Comparativa {
+  id            String   @id @default(uuid())
+  animeId       String
+  mangaId       String
+  description   String?
+  animeSceneUrl String?
+  mangaSceneUrl String?
+  createdAt     DateTime @default(now())
+
+  anime   Anime    @relation(fields: [animeId], references: [id])
+  manga   Manga    @relation(fields: [mangaId], references: [id])
+  ratings Rating[]
+  posts   Post[]
+}
+
+model Rating {
+  id            String   @id @default(uuid())
+  score         Float
+  comment       String?
+  userId        String
+  animeId       String?
+  mangaId       String?
+  comparativaId String?
+  createdAt     DateTime @default(now())
+
+  user        User         @relation(fields: [userId], references: [id])
+  anime       Anime?       @relation(fields: [animeId], references: [id])
+  manga       Manga?       @relation(fields: [mangaId], references: [id])
+  comparativa Comparativa? @relation(fields: [comparativaId], references: [id])
+}
+
+model Post {
+  id            String   @id @default(uuid())
+  title         String?
+  content       String
+  type          String   @default("general")
+  userId        String
+  comparativaId String?
+  animeId       String?
+  mangaId       String?
+  verdictScore  Float?
+  createdAt     DateTime @default(now())
+
+  user        User         @relation(fields: [userId], references: [id])
+  comparativa Comparativa? @relation(fields: [comparativaId], references: [id])
+  comments    Comment[]
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  post Post @relation(fields: [postId], references: [id])
+}
+
+model Favorite {
+  id      String  @id @default(uuid())
+  userId  String
+  animeId String?
+  mangaId String?
+
+  user  User   @relation(fields: [userId], references: [id])
+  anime Anime? @relation(fields: [animeId], references: [id])
+  manga Manga? @relation(fields: [mangaId], references: [id])
+}
+
+model Reputation {
+  id          String   @id @default(uuid())
+  fromUserId  String
+  toUserId    String
+  tag         String
+  createdAt   DateTime @default(now())
+
+  fromUser User @relation("reputationGiven", fields: [fromUserId], references: [id])
+  toUser   User @relation("reputationReceived", fields: [toUserId], references: [id])
+
+  @@unique([fromUserId, toUserId, tag])
+}
+
+model Achievement {
+  id        String   @id @default(uuid())
+  userId    String
+  tag       String
+  unlockedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, tag])
+}
