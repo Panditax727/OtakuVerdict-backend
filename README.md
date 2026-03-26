@@ -26,5 +26,5 @@ Sigue estos pasos para levantar el entorno de desarrollo localmente:
 
 1. **Clonar el repositorio:**
    ```bash
-   git clone [https://github.com/Panditax727/OtakuVerdict-backend.git](https://github.com/Panditax727/OtakuVerdict-backend.git)
+   git clone https://github.com/Panditax727/OtakuVerdict-backend.git
    cd OtakuVerdict-backend
